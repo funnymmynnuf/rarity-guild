@@ -91,6 +91,8 @@ contract Guild is Ownable {
     uint256 public guild_master;
     uint256 public guild_tribute;
 
+    uint256 public next_excursion;
+
     mapping(address => IDungeon) dungeons;
 
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -133,6 +135,8 @@ contract Guild is Ownable {
         guild_tribute = 0;
         guild_name = "Guild";
         guild_logo = "";
+
+        next_excursion = 1631211660;
     }
 
     // *************
@@ -208,6 +212,8 @@ contract Guild is Ownable {
             }
             _do_dungeons(wanderer);
         }
+
+        next_excursion = block.timestamp + 1 days;
     }
 
     // *************

@@ -182,7 +182,7 @@ contract Guild is Ownable {
         }
     }
 
-    function donate(address member) external payable {}
+    function donate() external payable {}
 
     // *************
     // Bulk Actions

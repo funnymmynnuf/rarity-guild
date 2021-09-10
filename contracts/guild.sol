@@ -89,7 +89,7 @@ contract Guild is Ownable {
     string public guild_name;
     string public guild_logo;
     uint256 public guild_master;
-    uint256 public tribute;
+    uint256 public guild_tribute;
 
     mapping(address => IDungeon) dungeons;
 
@@ -130,7 +130,7 @@ contract Guild is Ownable {
         rarity.setApprovalForAll(_msgSender(), true);
 
         guild_master = _guild_master;
-        tribute = 0;
+        guild_tribute = 0;
         guild_name = "Guild";
         guild_logo = "";
     }
@@ -144,11 +144,11 @@ contract Guild is Ownable {
     }
 
     function set_tribute(uint256 new_tribute) external onlyGM {
-        tribute = new_tribute;
+        guild_tribute = new_tribute;
     }
 
-    function set_name(uint256 new_name) external onlyGM {
-        tribute = new_name;
+    function set_name(string memory new_name) external onlyGM {
+        guild_name = new_name;
     }
 
     function set_logo(string memory new_logo) external onlyGM {
@@ -236,7 +236,7 @@ contract Guild is Ownable {
     }
 
     function add_wanderers(uint256[] memory wanderers) external payable {
-        require(msg.value >= tribute, "Minimum tribute was not reached.");
+        require(msg.value >= guild_tribute, "Minimum tribute was not reached.");
 
         for (uint256 i = 0; i < wanderers.length; i++) {
             rarity.transferFrom(_msgSender(), address(this), wanderers[i]);

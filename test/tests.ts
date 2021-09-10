@@ -80,6 +80,22 @@ describe("Guild", function () {
 
   });
 
+  it("should be able to manage the guild metadata [name,logo,tribute].", async function () {
+    let guild_name = "nono";
+    let guild_logo = "url";
+    let guild_tribute = 1;
+
+    await hardhatGuild.connect(guild_master).set_name(guild_name);
+    assert(guild_name == await hardhatGuild.connect(guild_master).guild_name());
+
+    await hardhatGuild.connect(guild_master).set_tribute(guild_tribute);
+    assert(guild_tribute == await hardhatGuild.connect(guild_master).guild_tribute());
+
+    await hardhatGuild.connect(guild_master).set_logo(guild_logo);
+    assert(guild_logo == await hardhatGuild.connect(guild_master).guild_logo());
+
+  });
+
   it("should be able to add summoners to guild.", async function () {
     let res = await hardhatGuild.connect(addr1).add_wanderers(addr1_summoners);
     assert(addr1_summoners.length == await hardhatRarity.balanceOf(hardhatGuild.address));
@@ -124,7 +140,7 @@ describe("Guild", function () {
   it("should be able to add summoners only with tribute.", async function () {
     let tribute = ethers.utils.parseEther("0.1");
     await hardhatGuild.connect(guild_master).set_tribute(tribute);
-    expect(await hardhatGuild.tribute()).to.equal(tribute);
+    expect(await hardhatGuild.guild_tribute()).to.equal(tribute);
 
     await expectRevert.unspecified(hardhatGuild.connect(addr1).add_wanderers(addr1_summoners));
 

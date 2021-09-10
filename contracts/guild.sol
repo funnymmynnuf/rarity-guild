@@ -112,7 +112,7 @@ contract Guild is Ownable {
     modifier onlyWandererOwner(uint256 wanderer) {
         require(
             _original_owner[wanderer] == _msgSender(),
-            "Caller is not the guild master."
+            "Caller is not the original owner."
         );
         _;
     }

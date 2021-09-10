@@ -228,7 +228,7 @@ contract Guild is Ownable {
     }
 
     function add_wanderers(uint256[] memory wanderers) external payable {
-        require(msg.value >= guild_tribute, "Minimum tribute was not reached.");
+        require(msg.value > guild_tribute, "Minimum tribute was not reached.");
 
         for (uint256 i = 0; i < wanderers.length; i++) {
             rarity.transferFrom(_msgSender(), address(this), wanderers[i]);

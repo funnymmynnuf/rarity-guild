@@ -669,7 +669,7 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 
 contract Rarity is ERC721 {
     uint256 public next_summoner;
-    uint256 constant xp_per_day = 250e18;
+    uint256 constant xp_per_day = 250e21;
     uint256 constant DAY = 0 seconds;
 
     string public constant name = "Rarity Manifested";

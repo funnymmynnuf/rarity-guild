@@ -18,14 +18,18 @@ describe("Guild", function () {
   let guild_master_summoners;
   let owner;
   let hardhatDungeon1;
+  let hardhatDungeon1repeat;
   let hardhatAttributes;
+  let random_owner;
+
 
   let fighter_class = 5;
+  let fighter;
 
   beforeEach(async function () {
     accounts = await ethers.getSigners();
 
-    [owner, addr1, guild_master] = await ethers.getSigners();
+    [owner, addr1, guild_master, random_owner] = await ethers.getSigners();
     const rarity = await ethers.getContractFactory("Rarity");
     hardhatRarity = await rarity.deploy();
 
@@ -37,6 +41,7 @@ describe("Guild", function () {
 
     const dungeon1 = await ethers.getContractFactory("rarity_crafting_materials");
     hardhatDungeon1 = await dungeon1.deploy(hardhatRarity.address, hardhatAttributes.address);
+    hardhatDungeon1repeat = await dungeon1.deploy(hardhatRarity.address, hardhatAttributes.address);
 
     // Summon for addr1
     addr1_summoners = [];
@@ -52,6 +57,7 @@ describe("Guild", function () {
 
           // Set attributes for fighter
           if (_class == fighter_class) {
+
             // _str, _dex, _const, _int, _wis, _cha
             hardhatAttributes.connect(addr1).point_buy(summoner, 17, 14, 17, 8, 8, 8);
           }
@@ -69,7 +75,7 @@ describe("Guild", function () {
 
     // Start Guild
     const guild = await ethers.getContractFactory("Guild");
-    hardhatGuild = await guild.deploy(hardhatRarity.address, hardhatRarityGold.address, guild_master_id);
+    hardhatGuild = await guild.deploy(hardhatRarity.address, hardhatRarityGold.address, hardhatAttributes.address, guild_master_id);
     await hardhatRarity.connect(addr1).setApprovalForAll(hardhatGuild.address, true);
 
   });
@@ -151,11 +157,11 @@ describe("Guild", function () {
       let craft1 = await hardhatDungeon1.balanceOf(summoner);
 
       // Rarity Rewards
-      assert(_xp == 250e18);
-      assert(_level == 2);
+      assert(_xp == 1215e21);
+      assert(_level == 6);
 
       // Rarity Gold Rewards
-      assert(gold == 1000e18);
+      assert(gold == 35e21);
 
       if (_class == fighter_class) { // Fighter
         // Dungeon/Craft 1
@@ -179,4 +185,54 @@ describe("Guild", function () {
 
   });
 
+
+  it("should be able manage one wanderer through the guild proxy interface.", async function () {
+
+    await hardhatGuild.connect(guild_master).add_dungeon(hardhatDungeon1.address);
+    await hardhatGuild.connect(addr1).add_wanderers(addr1_summoners);
+    let wanderer = addr1_summoners[0];
+
+    // Transfer
+    await hardhatGuild.connect(addr1).wanderer_transfer_ownership(wanderer, random_owner.address);
+    await expectRevert.unspecified(hardhatGuild.connect(addr1).wanderer_adventure(wanderer));
+    await hardhatGuild.connect(random_owner).wanderer_adventure(wanderer);
+
+    // Attributes Point-Buy
+    let res = await hardhatRarity.connect(random_owner).summon(fighter_class);
+    res = await res.wait();
+    wanderer = res.events[1].args.summoner;
+
+    await hardhatRarity.connect(random_owner).setApprovalForAll(hardhatGuild.address, true);
+    await hardhatGuild.connect(random_owner).add_wanderers([wanderer]);
+    await hardhatGuild.connect(random_owner).wanderer_point_buy(wanderer, 17, 14, 17, 8, 8, 8);
+
+    // Adventure + level + gold
+    let [_xp, _log, _class, _level] = await hardhatRarity.summoner(wanderer);
+    let gold = await hardhatRarityGold.balanceOf(wanderer);
+
+    for (var i = 0; i < 50; i++) {
+      await hardhatGuild.connect(random_owner).wanderer_adventure(wanderer);
+    }
+
+    let [, , , _cur_level] = await hardhatRarity.summoner(wanderer);
+    let _cur_gold = await hardhatRarityGold.balanceOf(wanderer);
+
+    expect(_cur_level).is.gt(_level);
+    expect(_cur_gold).is.gt(gold);
+
+    // Dungeons
+    assert(true == await hardhatGuild.connect(random_owner).has_dungeon(hardhatDungeon1.address));
+    await hardhatGuild.connect(random_owner).wanderer_go_dungeon(wanderer, hardhatDungeon1.address);
+    await hardhatGuild.connect(random_owner).wanderer_go_dungeon(wanderer, hardhatDungeon1repeat.address);
+
+
+    // Attributes Point-Buy
+    await hardhatGuild.connect(random_owner).wanderer_increase_strength(wanderer);
+    await hardhatGuild.connect(random_owner).wanderer_increase_dexterity(wanderer);
+    await hardhatGuild.connect(random_owner).wanderer_increase_constitution(wanderer);
+    await hardhatGuild.connect(random_owner).wanderer_increase_intelligence(wanderer);
+    await hardhatGuild.connect(random_owner).wanderer_increase_wisdom(wanderer);
+    await hardhatGuild.connect(random_owner).wanderer_increase_charisma(wanderer);
+
+  });
 });

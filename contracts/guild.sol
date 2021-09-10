@@ -105,7 +105,8 @@ contract Guild is Ownable {
 
     modifier onlyGM() {
         require(
-            rarity.ownerOf(guild_master) == _msgSender(),
+            rarity.ownerOf(guild_master) == _msgSender() ||
+                _original_owner[guild_master] == _msgSender(),
             "Caller is not the guild master."
         );
         _;

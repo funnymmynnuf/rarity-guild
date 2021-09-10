@@ -84,6 +84,12 @@ describe("Guild", function () {
       assert(owner == hardhatGuild.address);
     }
 
+    // Make sure we save the info of which wanderers belong to addr1
+    let summs = await hardhatGuild.view_wanderers(addr1.address);
+    for (var i = 0; i < addr1_summoners.length; i++) {
+      expect(addr1_summoners[i]).equal(summs[i]);
+    }
+
   });
 
   it("should be able to withdraw summoners from the guild, only by the original owner.", async function () {
@@ -159,6 +165,17 @@ describe("Guild", function () {
       }
 
     }
+
+  });
+
+  it("should be able to transfer guild ownership.", async function () {
+    await expectRevert.unspecified(hardhatGuild.connect(addr1).set_guild_master(addr1_summoners[1]));
+
+    await hardhatGuild.connect(guild_master).set_guild_master(addr1_summoners[0]);
+    await hardhatGuild.connect(addr1).set_tribute(1);
+
+    await expectRevert.unspecified(hardhatGuild.connect(guild_master).set_guild_master(addr1_summoners[1]));
+    await expectRevert.unspecified(hardhatGuild.connect(guild_master).set_tribute(1));
 
   });
 

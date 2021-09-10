@@ -45,6 +45,16 @@ interface IRarity {
     function adventurers_log(uint256) external returns (uint256 _ts);
 
     function level(uint256) external returns (uint256 _level);
+
+    function summoner(uint256 _summoner)
+        external
+        view
+        returns (
+            uint256 _xp,
+            uint256 _log,
+            uint256 _class,
+            uint256 _level
+        );
 }
 
 contract Guild is Ownable {
@@ -81,11 +91,16 @@ contract Guild is Ownable {
         rarity = IRarity(rarity_address);
         rarity_gold = IRarityGold(gold_address);
 
-        rarity.setApprovalForAll(msg.sender, true);
+        rarity.setApprovalForAll(_msgSender(), true);
 
         guild_master = _guild_master;
         tribute = 0;
         guild_name = "Guild";
+    }
+
+    function set_guild_master(uint256 new_guild_master) external onlyGM {
+        rarity.summoner(new_guild_master);
+        guild_master = new_guild_master;
     }
 
     function set_tribute(uint256 new_tribute) external onlyGM {
@@ -137,12 +152,26 @@ contract Guild is Ownable {
         }
     }
 
+    function view_wanderers(address wanderer_owner)
+        external
+        view
+        returns (uint256[] memory wanderers)
+    {
+        uint256[] memory _wanderers = new uint256[](guild.length());
+        for (uint256 i = 0; i < guild.length(); i++) {
+            if (_original_owner[guild.at(i)] == wanderer_owner) {
+                _wanderers[i] = guild.at(i);
+            }
+        }
+        return _wanderers;
+    }
+
     function add_wanderers(uint256[] memory wanderers) external payable {
         require(msg.value >= tribute, "Minimum tribute was not reached.");
 
         for (uint256 i = 0; i < wanderers.length; i++) {
-            rarity.transferFrom(msg.sender, address(this), wanderers[i]);
-            _original_owner[wanderers[i]] = msg.sender;
+            rarity.transferFrom(_msgSender(), address(this), wanderers[i]);
+            _original_owner[wanderers[i]] = _msgSender();
             guild.add(wanderers[i]);
         }
     }
@@ -151,17 +180,17 @@ contract Guild is Ownable {
         for (uint256 i = 0; i < wanderers.length; i++) {
             if (
                 guild.contains(wanderers[i]) &&
-                _original_owner[wanderers[i]] == msg.sender
+                _original_owner[wanderers[i]] == _msgSender()
             ) {
                 delete _original_owner[wanderers[i]];
                 guild.remove(wanderers[i]);
-                rarity.transferFrom(address(this), msg.sender, wanderers[i]);
+                rarity.transferFrom(address(this), _msgSender(), wanderers[i]);
             }
         }
     }
 
     function withdraw_tributes() external onlyGM {
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        (bool success, ) = _msgSender().call{value: address(this).balance}("");
         require(success, "Transfer failed.");
     }
 }

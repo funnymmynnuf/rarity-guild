@@ -24,7 +24,6 @@ set_logo(...)
 add_dungeon(...)
 remove_dungeon(...)
 withdraw_tributes(...)
-guild_funds(...)
 donate(...)
 ```
 ## Bulk Actions

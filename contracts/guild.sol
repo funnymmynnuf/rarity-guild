@@ -174,14 +174,6 @@ contract Guild is Ownable {
         require(success, "Transfer failed.");
     }
 
-    function guild_funds() external view returns (uint256 balance) {
-        for (uint256 i = 0; i < guild.length(); i++) {
-            if (guild.at(i) == guild_master) {
-                return _original_owner[guild_master].balance;
-            }
-        }
-    }
-
     function donate() external payable {}
 
     // *************

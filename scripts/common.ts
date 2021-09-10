@@ -12,5 +12,6 @@ export {
     ct,
     dotenv,
     contract_address,
-    ethers
+    ethers,
+    file_path
 }

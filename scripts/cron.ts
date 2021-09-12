@@ -9,7 +9,7 @@ cron.schedule("0 */30 * * * *", async () => {
     let last_block = await cm.ethers.provider.getBlockNumber();
     last_block = (await cm.ethers.provider.getBlock(last_block)).timestamp;
 
-    let wait_block = await cm.ct.next_excursion();
+    let wait_block = (await cm.ct.gs()).next_excursion;
 
     if (last_block > wait_block) {
         let res = await send_out();

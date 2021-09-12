@@ -33,7 +33,7 @@
     "test": "npx hardhat test",
     "node": "npx hardhat node --watch",
     "frontend": "cd frontend && npm run start",
-    "view_wanderers": "npx hardhat run --network ftm scripts/view_wanderers.ts",
+    "view_summoners": "npx hardhat run --network ftm scripts/view_summoners.ts",
     "send_out": "npx hardhat run --network ftm scripts/send_out.ts",
     "cron": "npx hardhat run --network ftm scripts/cron.ts"
   },

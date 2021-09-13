@@ -143,4 +143,33 @@ abstract contract GuildProxy is GuildManagement {
             gs.rarity_gold.claim(summoner);
         }
     }
+
+    // *************
+    // Skills
+    // *************
+
+    function proxy_set_skills(uint256 _summoner, uint8[36] memory _skills)
+        external
+        onlyWandererOwner(_summoner)
+    {
+        gs.rarity_skills.set_skills(_summoner, _skills);
+    }
+
+    // *************
+    // Crafting
+    // *************
+
+    function proxy_craft(
+        uint256 _summoner,
+        uint8 _base_type,
+        uint8 _item_type,
+        uint256 _crafting_materials
+    ) external onlyWandererOwner(_summoner) {
+        gs.rarity_crafting.craft(
+            _summoner,
+            _base_type,
+            _item_type,
+            _crafting_materials
+        );
+    }
 }

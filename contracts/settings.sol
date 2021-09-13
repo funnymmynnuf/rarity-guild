@@ -10,6 +10,8 @@ struct GuildSettings {
     IRarity rarity;
     IRarityGold rarity_gold;
     IRarityAttributes rarity_attributes;
+    IRarityCrafting rarity_crafting;
+    IRaritySkills rarity_skills;
     uint256 guild_master;
     uint256 tribute;
     uint256 next_excursion;
@@ -67,6 +69,14 @@ abstract contract GuildManagement is Ownable {
 
     function gm_set_rarity_attributes_address(address addr) external onlyGM {
         gs.rarity_attributes = IRarityAttributes(addr);
+    }
+
+    function gm_set_rarity_crafting_address(address addr) external onlyGM {
+        gs.rarity_crafting = IRarityCrafting(addr);
+    }
+
+    function gm_set_rarity_skills_address(address addr) external onlyGM {
+        gs.rarity_skills = IRaritySkills(addr);
     }
 
     // *************

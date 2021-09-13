@@ -10,6 +10,8 @@ contract GuildBase is GuildBatch {
         address rarity_address,
         address gold_address,
         address attributes_address,
+        address crafting_address,
+        address skills_address,
         uint256 guild_master,
         uint256 max_summoners,
         address[] memory _dungeons
@@ -19,6 +21,8 @@ contract GuildBase is GuildBatch {
         IRarityAttributes rarity_attributes = IRarityAttributes(
             attributes_address
         );
+        IRarityCrafting rarity_crafting = IRarityCrafting(crafting_address);
+        IRaritySkills rarity_skills = IRaritySkills(skills_address);
 
         string memory logo = "url";
         string memory name = "Guild";
@@ -35,6 +39,8 @@ contract GuildBase is GuildBatch {
             rarity,
             rarity_gold,
             rarity_attributes,
+            rarity_crafting,
+            rarity_skills,
             guild_master,
             tribute,
             next_excursion,

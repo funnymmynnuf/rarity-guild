@@ -7,19 +7,20 @@ import { expectRevert } from "@openzeppelin/test-helpers";
 describe("Guild", function () {
   let accounts: Signer[];
 
-  let Token;
   let hardhatGuild;
   let hardhatRarity;
   let hardhatRarityGold;
+  let hardhatAttributes;
+  let hardhatCrafting;
+  let hardhatSkills;
+  let hardhatDungeon1;
+  let hardhatDungeon1repeat;
   let addr1;
   let addr1_summoners;
   let guild_master;
   let guild_master_id;
   let guild_master_summoners;
   let owner;
-  let hardhatDungeon1;
-  let hardhatDungeon1repeat;
-  let hardhatAttributes;
   let random_owner;
 
 
@@ -42,6 +43,14 @@ describe("Guild", function () {
     const dungeon1 = await ethers.getContractFactory("rarity_crafting_materials");
     hardhatDungeon1 = await dungeon1.deploy(hardhatRarity.address, hardhatAttributes.address);
     hardhatDungeon1repeat = await dungeon1.deploy(hardhatRarity.address, hardhatAttributes.address);
+
+    // const skills = await ethers.getContractFactory("rarity_skills"); // TODO
+    const skills = await ethers.getContractFactory("rarity_attributes");
+    hardhatSkills = await skills.deploy(hardhatRarity.address);
+
+    // const crafting = await ethers.getContractFactory("rarity_crafting"); // TODO
+    const crafting = await ethers.getContractFactory("rarity_attributes");
+    hardhatCrafting = await crafting.deploy(hardhatRarity.address);
 
     // Summon for addr1
     addr1_summoners = [];
@@ -76,7 +85,7 @@ describe("Guild", function () {
     // Start Guild
     let max_summoners = 10000;
     const guild = await ethers.getContractFactory("GuildBase");
-    hardhatGuild = await guild.deploy(hardhatRarity.address, hardhatRarityGold.address, hardhatAttributes.address, guild_master_id, max_summoners, []);
+    hardhatGuild = await guild.deploy(hardhatRarity.address, hardhatRarityGold.address, hardhatAttributes.address, hardhatCrafting.address, hardhatSkills.address, guild_master_id, max_summoners, []);
     await hardhatRarity.connect(addr1).setApprovalForAll(hardhatGuild.address, true);
 
   });

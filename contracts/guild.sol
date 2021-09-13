@@ -28,7 +28,7 @@ contract GuildBase is GuildBatch {
         string memory name = "Guild";
         string memory guild_type = "Base";
         uint256 tribute = 0;
-        uint256 next_excursion = 1631211660;
+        uint256 next_excursion = 1631561401;
 
         for (uint256 i = 0; i < _dungeons.length; i++) {
             gs_dungeons[_dungeons[i]] = IDungeon(_dungeons[i]);

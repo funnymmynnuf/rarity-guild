@@ -23,14 +23,36 @@ abstract contract GuildBatch is GuildMembers {
     }
 
     function batch_send_out() external {
+        uint256[] memory to_idle = new uint256[](gs_summoners.length());
+        uint256 num_idle = 0;
+
         for (uint256 i = 0; i < gs_summoners.length(); i++) {
             uint256 summoner = gs_summoners.at(i);
+
+            // What if the tribute changed
+            if (gs_summoners_balances[summoner] < gs.tribute) {
+                to_idle[i] = summoner;
+                num_idle++;
+                continue;
+            }
+
+            gs_summoners_balances[summoner] -= gs.tribute;
+
+            if (gs_summoners_balances[summoner] < gs.tribute) {
+                to_idle[i] = summoner;
+                num_idle++;
+            }
 
             if (block.timestamp > gs.rarity.adventurers_log(summoner)) {
                 gs.rarity.adventure(summoner);
                 _level_up(summoner);
             }
             _do_dungeons(summoner);
+        }
+
+        for (uint256 i = 0; i < num_idle; i++) {
+            gs_summoners.remove(to_idle[i]);
+            gs_idle_summoners.add(to_idle[i]);
         }
 
         // Only GM can set out next_excursion time.

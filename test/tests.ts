@@ -76,7 +76,7 @@ describe("Guild", function () {
     // Start Guild
     let max_summoners = 10000;
     const guild = await ethers.getContractFactory("GuildBase");
-    hardhatGuild = await guild.deploy(hardhatRarity.address, hardhatRarityGold.address, hardhatAttributes.address, guild_master_id, max_summoners);
+    hardhatGuild = await guild.deploy(hardhatRarity.address, hardhatRarityGold.address, hardhatAttributes.address, guild_master_id, max_summoners, []);
     await hardhatRarity.connect(addr1).setApprovalForAll(hardhatGuild.address, true);
 
   });
@@ -173,18 +173,36 @@ describe("Guild", function () {
 
   });
 
-  it("should be able to add summoners only with tribute.", async function () {
-    let tribute = ethers.utils.parseEther("0.1");
-    await hardhatGuild.connect(guild_master).gm_set_tribute(tribute);
-    expect((await hardhatGuild.gs()).tribute).equal(tribute);
+  it("should be able to add summoners only with enough tribute per summoner for 1 run.", async function () {
+    let tribute_per_summoner = ethers.utils.parseEther("0.1");
+    let total_tribute = ethers.utils.parseEther("1.1");
+
+    await hardhatGuild.connect(guild_master).gm_set_tribute(tribute_per_summoner);
+    expect((await hardhatGuild.gs()).tribute).equal(tribute_per_summoner);
 
     await expectRevert.unspecified(hardhatGuild.connect(addr1).member_add_summoners(addr1_summoners));
 
     await hardhatGuild.connect(addr1).member_add_summoners(addr1_summoners, {
-      value: ethers.utils.parseEther("0.1")
+      value: total_tribute
     });
 
-    expect(await ethers.provider.getBalance(hardhatGuild.address)).to.equal(tribute);
+    expect(await ethers.provider.getBalance(hardhatGuild.address)).to.equal(total_tribute);
+
+
+    let balances = await hardhatGuild.connect(addr1).member_view_summoners_balances(addr1_summoners);
+    for (var i in balances) {
+      expect(balances[i]).equal(tribute_per_summoner);
+    }
+
+    await hardhatGuild.connect(addr1).batch_send_out();
+    assert(0 == await hardhatGuild.connect(guild_master).gm_get_active_summoner_count())
+    assert(11 == await hardhatGuild.connect(guild_master).gm_get_idle_summoner_count())
+
+    await hardhatGuild.connect(addr1).member_fund_summoners(addr1_summoners, {
+      value: total_tribute
+    });
+    assert(11 == await hardhatGuild.connect(guild_master).gm_get_active_summoner_count())
+    assert(0 == await hardhatGuild.connect(guild_master).gm_get_idle_summoner_count())
 
   });
 

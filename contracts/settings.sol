@@ -31,6 +31,11 @@ abstract contract GuildManagement is Ownable {
     using EnumerableSet for EnumerableSet.UintSet;
     EnumerableSet.UintSet gs_summoners;
 
+    using EnumerableSet for EnumerableSet.UintSet;
+    EnumerableSet.UintSet gs_idle_summoners;
+
+    mapping(uint256 => uint256) gs_summoners_balances;
+
     modifier onlyGM() {
         require(
             gs.rarity.ownerOf(gs.guild_master) == _msgSender() ||
@@ -93,6 +98,24 @@ abstract contract GuildManagement is Ownable {
         gs.max_summoners = new_max_summoners;
     }
 
+    function gm_get_active_summoner_count()
+        external
+        view
+        onlyGM
+        returns (uint256 count)
+    {
+        return gs_summoners.length();
+    }
+
+    function gm_get_idle_summoner_count()
+        external
+        view
+        onlyGM
+        returns (uint256 counts)
+    {
+        return gs_idle_summoners.length();
+    }
+
     function gm_has_dungeon(address dungeon) external view returns (bool has) {
         return gs_dungeons_list.contains(dungeon);
     }
@@ -129,6 +152,4 @@ abstract contract GuildManagement is Ownable {
         (bool success, ) = _msgSender().call{value: address(this).balance}("");
         require(success, "Transfer failed.");
     }
-
-    // function donate() external payable {}
 }
